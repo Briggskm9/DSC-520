@@ -1,0 +1,121 @@
+---
+title: "Final Project"
+author: "Katie Briggs"
+date: "5/28/2020"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Library
+```{r library, echo=FALSE}
+library(ggplot2)
+library(tidyverse)
+library(dbplyr)
+library(infer)
+library(ggpubr)
+library(ppcor)
+library(boot)
+library(car)
+library(QuantPsyc)
+library(ggExtra)
+library(psych)
+library(readxl)
+library(devtools)
+library(foreign)
+library(caret)
+library(lattice)
+library(class)
+library(gmodels)
+library(pastecs)
+```
+
+
+
+
+
+
+
+## Include Histograms to determine Normality
+# Here is was determined that the adult counts were skewed to the left.
+
+```{r hist adult count, echo=TRUE}
+ggplot(GroupTable, aes(x = Adult_Count)) + geom_histogram(aes(y = ..density..), 
+binwidth = 5, size = 5, col = "blue") + geom_density(alpha = .2, fill = "#FF6666")
+```
+# Here is was determined that the hatchery production are skewed a little to the left and not unimodal.
+
+```{r Hatch Hist, echo=TRUE}
+ggplot(Hatchery, aes(x = Actual_Adult_Hatchery_Produced)) + geom_histogram(aes(y = ..density..), 
+binwidth = 5, size = 5, col = "blue") + geom_density(alpha = .2, fill = "#FF6666")
+```
+
+# Abundanced Quantity is flat across the board, meaning that adundance of wild salmon is not normally distributed. 
+```{r hist AQ, echo=TRUE}
+ggplot(GroupTable, aes(x = AbundanceQuantity)) + geom_histogram(aes(y = ..density..), 
+binwidth = 5, size = 5, col = "blue") + geom_density(alpha = .2, fill = "#FF6666")
+```
+
+# The species returning are Chinook, Coho and Chum Salmon.  
+
+```{r Species, echo=TRUE}
+ggplot(GroupTable, aes(x = Species)) + geom_histogram(stat = "count")
+
+```
+
+# QQplots
+```{r QQ AdultCount, echo=TRUE}
+ggplot(GroupTable, aes(sample = Adult_Count )) + stat_qq(col = "blue")
+qqnorm(GroupTable$Adult_Count)
+qqline(GroupTable$Adult_Count)
+```
+
+```{r qq aq, echo=TRUE}
+ggplot(GroupTable, aes(sample = AbundanceQuantity)) + stat_qq(col = "blue")
+qqnorm(GroupTable$AbundanceQuantity)
+qqline(GroupTable$AbundanceQuantity)
+```
+
+# descriptive statistics
+```{r stat, echo=TRUE}
+stat.desc(GroupTable$Adult_Count, basic=TRUE, desc=TRUE, norm=FALSE, p=0.95)
+stat.desc(GroupTable$AbundanceQuantity, basic=TRUE, desc=TRUE, norm=FALSE, p=0.95)
+```
+
+```{r Regression, echo=TRUE}
+# Regression
+ggplot(GroupTable, aes(x = Species, y = Adult_Count, color = Species)) +
+  geom_jitter()
+  
+ggplot(GroupTable, aes(x = Species,y = AbundanceQuantity)) + geom_point() + 
+  labs(x = "Species", y = "Abundance", title = 'Final Project') + 
+  geom_smooth(method = 'lm', se = FALSE,)
+
+ggplot(GroupTable, aes(x = Species,y = Adult_Count)) + geom_point() + 
+  labs(x = "Species", y = "Adult Counts", title = 'Final Project') + 
+  geom_smooth(method = 'lm', se = FALSE,)
+```
+# Linear Regression
+
+```{r LR, echo=TRUE}
+ggplot(Hatch_subset, aes(x = AdultReturnsTotal,y = Actual_Adult_Hatchery_Produced )) + geom_point() + 
+  labs(x = "Returns", y = "Produced", title = 'Final Project') + 
+  geom_smooth(method = 'lm', se = FALSE,)
+```
+
+```{r lm, echo=TRUE}
+lm(formula = Actual_Adult_Hatchery_Produced ~ AdultReturnsTotal, data = Hatch_subset)
+```
+
+
+```{r test, echo=TRUE}
+shapiro.test(Hatch_subset$Actual_Adult_Hatchery_Produced)
+shapiro.test(Hatch_subset$AdultReturnsTotal)
+```
+
+```{r cortest, echo=TRUE}
+cor.test(Hatch_subset$Actual_Adult_Hatchery_Produced,Hatch_subset$AdultReturnsTotal,
+         method = "pearson",conf.level = .99)
+```
+
